@@ -109,3 +109,46 @@ struct SBPOperator{T,MT<:AbstractMatrix{T},VT<:AbstractVector{T},AT}
     auxiliary_operators::AT
     diagnostics::NamedTuple
 end
+
+"""A first-derivative SBP operator exact on a sampled space on one fixed grid."""
+struct FunctionSpaceSBPOperator{T,DT<:NamedTuple}
+    derivative_order::Int
+    x::Vector{T}
+    D::Matrix{T}
+    H::Matrix{T}
+    B::Matrix{T}
+    Q::Matrix{T}
+    basis_labels::Vector{String}
+    diagnostics::DT
+end
+
+"""The outcome of one fixed closure configuration in the stencil search."""
+struct SBPClosureAttempt
+    norm::Symbol
+    closure_depth::Int
+    interior_radius::Int
+    status::Symbol
+end
+
+"""A failed stencil construction, with the configurations that were tried."""
+struct SBPConstructionError <: Exception
+    interior_order::Int
+    boundary_order::Int
+    status::Symbol
+    attempts::Vector{SBPClosureAttempt}
+end
+
+function Base.showerror(io::IO, err::SBPConstructionError)
+    print(io, "SBP¹(", err.interior_order, ",", err.boundary_order,
+          ") construction returned ", err.status)
+    if err.status === :theoretical_obstruction
+        print(io, ". Boundary exactness forces the interior moment of degree ",
+              err.interior_order + 1, " to vanish, contradicting exact interior order ",
+              err.interior_order, ". Use order_policy=:allow_upgrade to permit a higher interior order.")
+    end
+    if !isempty(err.attempts)
+        last = err.attempts[end]
+        print(io, " after ", length(err.attempts), " candidate(s); last was ", last.norm,
+              " at depth ", last.closure_depth, " (", last.status, ")")
+    end
+end

@@ -2320,3 +2320,16 @@ This combines the three essential papers into a single coherent construction met
 | Your spherical SBP paper     | Selective additional exactness conditions and analytical regularity-driven construction |
 
 The immediate objective is not to produce an optimally tuned SBP operator. It is to produce **mathematically valid, reproducible, high-order Cartesian operators from linear systems**, with sufficient diagnostics that we can trust them when they become inputs to our spherical and hyperboloidal constructions.
+
+For the repeating centered-stencil ansatz used here, exact equal-order
+requests encounter a [moment obstruction](derivations/equal_order_obstruction.md)
+before the positivity test. The package may raise the interior order under
+`order_policy=:allow_upgrade`, while preserving the boundary order and
+reporting the original request. Feasibility in other ansatzes, including
+fixed-grid function-space constructions, is a separate question.
+
+The [experimental analytical perturbation](derivations/analytical_perturbation.md)
+constructs equal-order operators with a period-two interior on odd grids.
+It preserves the diagonal norm of an exact conventional SBP(2p,p)
+family and adds local skew tiles that annihilate polynomials through
+degree p. Orders 2, 4 and 6 are covered by exact regression tests.

@@ -14,20 +14,26 @@ include("Stencils/AccuracyBasis.jl")
 include("Stencils/Centered.jl")
 include("Strategies/AbstractStrategy.jl")
 include("Strategies/FirstDerivative.jl")
+include("Construction/NormFeasibility.jl")
 include("Operators/SBPFamily.jl")
 include("Operators/Instantiation.jl")
+include("Operators/FunctionSpace.jl")
 include("Operators/LinearAlgebraInterface.jl")
+include("Experimental/Experimental.jl")
 
 export AffineSolution,
        AbstractSBPStrategy,
        BasisSamples,
        CenteredStencil,
        FirstDerivativeSBP,
+       FunctionSpaceSBPOperator,
        LinearConstraintSystem,
        MatrixParameterization,
        MonomialBasis,
        PolynomialBasis,
        SBPFamily,
+       SBPClosureAttempt,
+       SBPConstructionError,
        SBPOperator,
        SBPSpec,
        SecondDerivativeSBP,
@@ -50,9 +56,11 @@ export AffineSolution,
        moment_system,
        nullity,
        polynomial_matrices,
+       reconstruct_skew,
        sample_basis,
        skew_symmetric_parameterization,
        solve_constraints,
-       symmetric_parameterization
+       symmetric_parameterization,
+       weighted_derivative_matrix
 
 end

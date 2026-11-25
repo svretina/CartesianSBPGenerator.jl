@@ -1,6 +1,9 @@
-derivative_matrix(operator::SBPOperator) = operator.D
-mass_matrix(operator::SBPOperator) = operator.H
-boundary_matrix(operator::SBPOperator) = operator.B
+derivative_matrix(operator::Union{SBPOperator,FunctionSpaceSBPOperator}) = operator.D
+mass_matrix(operator::Union{SBPOperator,FunctionSpaceSBPOperator}) = operator.H
+boundary_matrix(operator::Union{SBPOperator,FunctionSpaceSBPOperator}) = operator.B
+weighted_derivative_matrix(operator::SBPOperator) = operator.auxiliary_operators.Q
+weighted_derivative_matrix(operator::FunctionSpaceSBPOperator) = operator.Q
+gradient_matrix(operator::FunctionSpaceSBPOperator) = derivative_matrix(operator)
 
 function gradient_matrix(operator::SBPOperator)
     operator.derivative_order == 1 || throw(ArgumentError(
