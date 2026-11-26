@@ -39,6 +39,12 @@ function bandwidth(M)
     return (lower=maximum(I-J;init=0), upper=maximum(J-I;init=0))
 end
 
+function reflect(M::SparseMatrixCSC)
+    n = size(M,1)
+    rows,cols,values = findnz(M)
+    return sparse(n+1 .- rows,n+1 .- cols,values,n,n)
+end
+
 function exact_positive(H)
     width = bandwidth(H).lower
     iszero(width) && return all(>(0),diag(H))
@@ -52,6 +58,24 @@ function exact_positive(H)
         end
     end
     return true
+end
+
+function has_local_norm_blocks(H,m)
+    n = size(H,1)
+    bulk = m+1:n-m
+    return m > 0 && isdiag(H[bulk,bulk]) &&
+           iszero(nnz(H[1:m,m+1:n])) && iszero(nnz(H[1:n-m,n-m+1:n]))
+end
+
+function positive_norm(H,m,exact)
+    isdiag(H) && return all(>(0),diag(H))
+    positive(A) = exact ? exact_positive(A) : isposdef(Symmetric(Matrix{Float64}(A)))
+    if has_local_norm_blocks(H,m)
+        n = size(H,1)
+        return all(>(0),diag(H)[m+1:n-m]) &&
+               positive(H[1:m,1:m]) && positive(H[n-m+1:n,n-m+1:n])
+    end
+    return positive(H)
 end
 
 function taylor_moments(Dhat; degree::Integer=28, rtol=nothing)
@@ -87,8 +111,8 @@ function algebraic_diagnostics(op::OperatorData; degree=28, minimum_order=1,
     Dhat,Hhat = op.h .* op.D, op.H ./ op.h
     Q = dropzeros!(Hhat*Dhat)
     E = Q + Q' - op.B
-    DR = Dhat + reverse(Dhat;dims=(1,2))
-    HR = Hhat - reverse(Hhat;dims=(1,2))
+    DR = dropzeros!(Dhat + reflect(Dhat))
+    HR = dropzeros!(Hhat - reflect(Hhat))
     exact = eltype(op.D) <: Rational
     tol = exact ? 0 : 128eps(eltype(op.D))
     scaled_residual(A,scale) = opnorm(A,Inf)/max(scale,one(scale))
@@ -97,8 +121,7 @@ function algebraic_diagnostics(op::OperatorData; degree=28, minimum_order=1,
     sbp_relative = iszero(scale) ? zero(sbp_absolute) : sbp_absolute/scale
     taylor = taylor_moments(Dhat;degree)
     symmetric = scaled_residual(Hhat-Hhat',opnorm(Hhat,Inf)) <= tol
-    positive = symmetric && (exact ? exact_positive(Hhat) :
-                                              isposdef(Symmetric(Matrix{Float64}(Hhat))))
+    positive = symmetric && positive_norm(Hhat,op.depth,exact)
     exact_rank = exact && n <= exact_rank_max ? _rank_of_weighted_derivative(Matrix(Q)) : missing
     numerical_rank = !exact && n <= exact_rank_max ? rank(Matrix{Float64}(Q)) : missing
     tested_rank = coalesce(exact_rank,numerical_rank)
@@ -118,18 +141,24 @@ end
 function norm_diagnostics(op::OperatorData; degree=16)
     n = length(op.x)
     Hhat = op.H ./ op.h
-    values = isdiag(Hhat) ? sort(Float64.(diag(Hhat))) : eigvals(Symmetric(Matrix{Float64}(Hhat)))
+    m = op.depth
+    bulk = m+1:n-m
+    blocks = has_local_norm_blocks(Hhat,m)
+    values = if isdiag(Hhat)
+        sort(Float64.(diag(Hhat)))
+    elseif blocks
+        sort!(vcat(eigvals(Symmetric(Matrix{Float64}(Hhat[1:m,1:m]))),
+                   eigvals(Symmetric(Matrix{Float64}(Hhat[n-m+1:n,n-m+1:n]))),
+                   Float64.(diag(Hhat)[bulk])))
+    else
+        eigvals(Symmetric(Matrix{Float64}(Hhat)))
+    end
     # Normalize coordinates to [0, 1] to avoid artificial scaling with origin.
     y = (op.x .- first(op.x)) ./ (last(op.x)-first(op.x))
     X = hcat((y.^k for k in 0:degree)...)
     scale = last(op.x)-first(op.x)
     bilinear = X' * (op.H * X) - [scale/(i+j+1) for i in 0:degree,j in 0:degree]
-    m = op.depth
-    blocks = m > 0 && isdiag(Hhat[m+1:n-m,m+1:n-m]) &&
-             all(iszero,Hhat[1:m,m+1:n]) && all(iszero,Hhat[1:n-m,n-m+1:n])
-    bounds = blocks ? extrema(vcat(eigvals(Symmetric(Matrix{Float64}(Hhat[1:m,1:m]))),
-        eigvals(Symmetric(Matrix{Float64}(Hhat[n-m+1:n,n-m+1:n]))),
-        Float64.(diag(Hhat)[m+1:n-m]))) : missing
+    bounds = blocks ? extrema(values) : missing
     return (; eigenvalues=values, min=first(values),max=last(values),
              condition=last(values)/first(values), weights=diag(Hhat),
              quadrature=vec(bilinear[1,:]), bilinear, block_bounds=bounds)
