@@ -2333,3 +2333,15 @@ constructs equal-order operators with a period-two interior on odd grids.
 It preserves the diagonal norm of an exact conventional SBP(2p,p)
 family and adds local skew tiles that annihilate polynomials through
 degree p. Orders 2, 4 and 6 are covered by exact regression tests.
+
+## Numerical characterization
+
+The [benchmark campaign](experiments/operator_characterization/README.md)
+accepts a derivative, mass, endpoint matrix and uniform grid. It analyzes
+the dimensionless matrices `hD` and `H/h` while retaining physical units
+in manufactured PDE tests. Exact local moments and the SBP identity are
+checked before numerical characterization. The raw derivative spectrum
+and the spectrum of the SAT evolution are reported separately. Energy
+amplification is measured after a Cholesky similarity transform, and
+periodic dispersion uses the repeating symbols of `H/h` and `Q`.
+The configuration records the finite rank, spectral and PDE testing limits.

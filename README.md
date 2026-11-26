@@ -183,3 +183,10 @@ The [alternating certification report](derivations/alternating_certification.md)
 includes exact interior coefficients, Bloch dispersion and SAT benchmarks
 for the original direct construction. Its high-order boundary closures
 impose severe explicit time-step restrictions.
+
+## Numerical characterization
+
+The [benchmark suite](experiments/operator_characterization/README.md)
+compares the operator families on common grids and exports certification,
+dispersion, PDE, and performance data with CairoMakie figures. Its
+experiment environment includes the plotting dependencies.

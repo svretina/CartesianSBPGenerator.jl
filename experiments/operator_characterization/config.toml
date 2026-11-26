@@ -1,0 +1,57 @@
+[grid]
+domain = [0.0, 1.0]
+sizes = [65, 129, 257, 513, 1025]
+test_even_sizes = true
+compact_max_nodes = 129
+
+[operators]
+orders = [2, 4, 6]
+families = ["standard", "restricted_full", "alternating", "analytical", "compact"]
+amplitude_multipliers = ["1/2", "1", "2"]
+
+[accuracy]
+maximum_taylor_degree = 28
+exact_rank_max = 129
+bigfloat_precision = 256
+wavenumbers = [1, 4, 8]
+
+[spectrum]
+grid_sizes = [65, 129, 257, 513]
+sat_penalties = [0.5, 0.75, 1.0, 1.5, 2.0]
+advanced_sizes = [65, 129]
+
+[pseudospectrum]
+enabled = true
+grid_sizes = [65]
+sampling_points = 150
+contour_levels = [-8, -7, -6, -5, -4, -3, -2, -1]
+
+[dispersion]
+sampling_points = 4097
+relative_error_thresholds = [0.1, 0.01, 0.001]
+
+[time_integration]
+cfl_safety_factor = 0.7
+temporal_error_fraction = 0.05
+max_steps = 1250000
+snapshots = 41
+grid_sizes = [65, 129, 257]
+primary_amplitude_only = true
+
+[advection]
+final_times = [0.25, 1.0, 10.0]
+crossings = [1, 10, 100]
+packet_ppw = [6, 8, 12, 16, 24, 32, 48]
+
+[wave]
+standing_wave_modes = [1, 2, 4, 8]
+number_of_periods = [1, 10, 100]
+
+[performance]
+samples = 30
+
+[output]
+save_pdf = true
+save_png = true
+png_dpi = 300
+font = "TeX Gyre Heros"

@@ -1,0 +1,38 @@
+[grid]
+sizes = [41, 65]
+compact_max_nodes = 66
+
+[operators]
+orders = [2, 4, 6]
+
+[spectrum]
+grid_sizes = [41, 65]
+sat_penalties = [0.5, 1.0]
+advanced_sizes = [41]
+
+[pseudospectrum]
+grid_sizes = [41]
+sampling_points = 20
+
+[dispersion]
+sampling_points = 129
+
+[time_integration]
+grid_sizes = [41, 65]
+snapshots = 9
+max_steps = 20000
+
+[advection]
+final_times = [0.25, 1.0]
+crossings = [1, 2]
+packet_ppw = [8, 16]
+
+[wave]
+standing_wave_modes = [1]
+number_of_periods = [1, 2]
+
+[performance]
+samples = 5
+
+[output]
+png_dpi = 160

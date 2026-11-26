@@ -20,6 +20,7 @@ include("Operators/Instantiation.jl")
 include("Operators/FunctionSpace.jl")
 include("Operators/LinearAlgebraInterface.jl")
 include("Experimental/Experimental.jl")
+include("Diagnostics/Diagnostics.jl")
 
 export AffineSolution,
        AbstractSBPStrategy,
